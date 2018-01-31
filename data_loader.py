@@ -26,7 +26,6 @@ def split_data(data, percent_train=0.80):
 
 
 if __name__=='__main__':
-    # https://datamarket.com/data/set/22u3/international-airline-passengers-monthly-totals-in-thousands-jan-49-dec-60#!ds=22u3&display=line
     timeseries = load_series('international-airline-passengers.csv')
     print(np.shape(timeseries))
 
