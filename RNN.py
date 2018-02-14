@@ -84,6 +84,7 @@ class RNNModel:
 
 
 def plot_results(training_x, predictions, actual, filename):
+    
     plt.figure()
     num_train = len(training_x)
     plt.plot(list(range(num_train)), training_x, color='b', label='training data')
@@ -154,7 +155,7 @@ if __name__ == '__main__':
     """
     
     seq_size = 5
-    predictor = RNNModel(input_dimension=1, sequence_size=seq_size, hidden_dimension=100)
+    predictor = RNNModel(input_dimension=1, sequence_size=sequence_size, hidden_dimension=100)
     
     # Change this to load a different csv file of timestamps and channel_converted_values
     data = data_loader.load_series('clt_ccv.csv')
