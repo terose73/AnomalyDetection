@@ -46,7 +46,9 @@ class SeriesPredictor:
         with tf.Session() as sess:
             tf.get_variable_scope().reuse_variables()
             sess.run(tf.global_variables_initializer())
-            max_patience = 3
+
+
+            max_patience = 1
             patience = max_patience
             min_test_err = float('inf')
             step = 0
@@ -54,7 +56,7 @@ class SeriesPredictor:
                 _, train_err = sess.run([self.train_op, self.cost], feed_dict={self.x: train_x, self.y: train_y})
                 if step % 100 == 0:
                     test_err = sess.run(self.cost, feed_dict={self.x: test_x, self.y: test_y})
-                    print('step: {}\t\ttrain err: {}\t\ttest err: {}'.format(step, train_err, test_err))
+                    print('step: {}\t\ttraining error: {}\t\ttesting error: {}'.format(step, train_err, test_err))
                     if test_err < min_test_err:
                         min_test_err = test_err
                         patience = max_patience
@@ -131,6 +133,8 @@ if __name__ == '__main__':
     channel_converted_value, channel_last_timestamp = create_lists_ccv_clt(file_increment_num, 27)
 
     channel_last_datetime = unix_timestamp_to_datetime(channel_last_timestamp)
+
+
     """
     f = open('clt_ccv.csv', 'w')
     for x,y in zip(channel_last_timestamp,channel_converted_value):
@@ -139,9 +143,15 @@ if __name__ == '__main__':
     """
     seq_size = 5
     predictor = SeriesPredictor(input_dim=1, seq_size=seq_size, hidden_dim=100)
-    data = data_loader.load_series('clt_ccv.csv')
+
+    data = data_loader.load_series('2_ccv_clt.csv')
     train_data, actual_vals = data_loader.split_data(data)
 
+    reconditioned_data = data_loader.recondition_data(data)
+    train_data_reconditioned, actual_vals_reconditioned = data_loader.split_data(reconditioned_data)
+
+
+    train_data, actual_vals = data_loader.split_data(data)
     train_x, train_y = [], []
     for i in range(len(train_data) - seq_size - 1):
         train_x.append(np.expand_dims(train_data[i:i+seq_size], axis=1).tolist())
@@ -157,6 +167,12 @@ if __name__ == '__main__':
     with tf.Session() as sess:
 
         predicted_vals = predictor.test(sess, test_x)[:,0]
+
+        predicted_vals_reconditioned = data_loader.recondition_data(predicted_vals)
+
         print('predicted_vals', np.shape(predicted_vals))
 
-        plot_results(train_data, predicted_vals, actual_vals, 'predictions.png')
+        print('{}  TO  {}'.format(channel_last_datetime[0], channel_last_datetime[-1]))
+
+
+        plot_results(train_data_reconditioned, predicted_vals_reconditioned, actual_vals_reconditioned, 'predictions.png')
